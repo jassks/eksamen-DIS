@@ -1,5 +1,6 @@
 package controllers;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -132,4 +133,31 @@ public class UserController {
     // Return user
     return user;
   }
+
+  public static User updateUser(User user) {
+
+    if (dbCon == null) {
+      dbCon = new DatabaseController();
+    }
+
+    try{
+      PreparedStatement updateUser = dbCon.getConnection().prepareStatement("UPDATE user SET " +
+              "first_name = ?, last_name = ?, password = ?, email = ? WHERE id=? ");
+
+      updateUser.setString(1, user.getFirstname());
+      updateUser.setString(2, user.getLastname());
+      updateUser.setString(3, user.getPassword());
+      updateUser.setString(4, user.getEmail());
+      updateUser.setInt(5, user.getId());
+
+      updateUser.executeUpdate();
+
+    } catch (SQLException sql){
+      sql.printStackTrace();;
+    }
+
+
+    return user;
+  }
+
 }
