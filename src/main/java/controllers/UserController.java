@@ -160,4 +160,24 @@ public class UserController {
     return user;
   }
 
+  public static User deleteUser (User user) {
+
+    if(dbCon == null){
+      dbCon = new DatabaseController();
+    }
+
+    try{
+      PreparedStatement deleteUser = dbCon.getConnection().prepareStatement("DELETE FROM user WHERE id = ? ");
+
+      deleteUser.setInt(1, user.getId());
+
+      deleteUser.executeUpdate();
+
+    } catch (SQLException sql){
+      sql.printStackTrace();
+    }
+
+    return user;
+  }
+
 }

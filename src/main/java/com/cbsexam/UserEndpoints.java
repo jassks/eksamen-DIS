@@ -85,26 +85,40 @@ public class UserEndpoints {
   @POST
   @Path("/login")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response loginUser(String x) {
+  public Response loginUser(String body) {
 
     // Return a response with status 200 and JSON as type
     return Response.status(400).entity("Endpoint not implemented yet").build();
   }
 
-  // TODO: Make the system able to delete users
-  public Response deleteUser(String x) {
+  // TODO: Make the system able to delete users (FIX)
+  @DELETE
+  @Path("/{idUser}")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response deleteUser(String body) {
 
-    // Return a response with status 200 and JSON as type
-    return Response.status(400).entity("Endpoint not implemented yet").build();
+      User user1 = new Gson().fromJson(body, User.class);
+
+      User user2 = UserController.deleteUser(user1);
+
+      String json = new Gson().toJson(user2);
+
+
+      if(user2 != null){
+          // Return a response with status 200 and JSON as type
+          return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+      } else {
+          return Response.status(400).entity("Could not delete user").build();
+      }
   }
 
-  // TODO: Make the system able to update users
+  // TODO: Make the system able to update users (FIX)
   @PUT
   @Path("/{idUser}")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateUser(String x) {
+  public Response updateUser(String body) {
 
-    User user1 = new Gson().fromJson(x, User.class);
+    User user1 = new Gson().fromJson(body, User.class);
 
     User user2 = UserController.updateUser(user1);
 
@@ -115,7 +129,7 @@ public class UserEndpoints {
     if (user2 != null){
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     }  else {
-      return Response.status(400).entity("Endpoint not implemented yet").build();
+      return Response.status(400).entity("Could not update user").build();
     }
   }
 }
