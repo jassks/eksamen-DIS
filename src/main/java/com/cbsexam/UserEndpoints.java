@@ -32,9 +32,15 @@ public class UserEndpoints {
     json = Encryption.encryptDecryptXOR(json);
 
     // Return the user with the status code 200
-    // TODO: What should happen if something breaks down?
-    return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+    // TODO: What should happen if something breaks down? (FIX)
+
+    if (user != null) {
+        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+    } else {
+        return Response.status(400).entity("Could not find user").build();
+    }
   }
+
 
   /** @return Responses */
   @GET
@@ -122,11 +128,10 @@ public class UserEndpoints {
 
     User user2 = UserController.updateUser(user1);
 
-    // Return a response with status 200 and JSON as type
-
     String json = new Gson().toJson(user2);
 
     if (user2 != null){
+      // Return a response with status 200 and JSON as type
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     }  else {
       return Response.status(400).entity("Could not update user").build();
