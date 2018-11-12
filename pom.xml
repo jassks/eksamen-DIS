@@ -99,7 +99,6 @@
     </dependencies>
 
 
-
     <properties>
         <jersey.version>2.23.2</jersey.version>
     </properties>

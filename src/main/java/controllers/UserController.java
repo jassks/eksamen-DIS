@@ -4,6 +4,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
 import model.User;
 import utils.Hashing;
 import utils.Log;
@@ -11,7 +15,6 @@ import utils.Log;
 public class UserController {
 
   private static DatabaseController dbCon;
-
 
   public UserController() {
     dbCon = new DatabaseController();
@@ -184,6 +187,57 @@ public class UserController {
     return user;
   }
 
+  public static String loginUser (User user) {
+
+    if (dbCon == null) {
+      dbCon = new DatabaseController();
+    }
+
+    ResultSet resultSet;
+    User newUser;
+    String token = null;
+
+
+    try{
+        PreparedStatement loginUser = dbCon.getConnection().prepareStatement("SELECT * FROM user WHERE email = ? AND password = ?");
+
+        loginUser.setString(1,user.getEmail());
+        loginUser.setString(2,Hashing.hashWithSaltSha(user.getPassword()));
+
+        resultSet = loginUser.executeQuery();
+
+        if (resultSet.next()){
+            newUser = new User (
+                    resultSet.getInt("id"),
+                    resultSet.getString("first_name"),
+                    resultSet.getString("last_name"),
+                    resultSet.getString("password"),
+                    resultSet.getString("email"));
+
+            if (newUser != null){
+                try{
+                    Algorithm algorithm = Algorithm.HMAC256("secret");
+                    token = JWT.create()
+                            .withClaim("userId", user.getId())
+                            .withIssuer("auth0")
+                            .sign(algorithm);
+                }catch(JWTCreationException ex){
+                    //DER STÅR NOGET ANDET I KODEN
+                } finally {
+                    return token;
+                }
+            }
+        } else {
+            System.out.print("No user found");
+        }
+
+    } catch (SQLException sqlEx) {
+      sqlEx.printStackTrace();
+    }
+
+    return "";
+
+  }
 
 
 }
