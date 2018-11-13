@@ -1,5 +1,6 @@
 package controllers;
 
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,6 +16,8 @@ import utils.Log;
 public class UserController {
 
   private static DatabaseController dbCon;
+
+  public static String currentToken;
 
   public UserController() {
     dbCon = new DatabaseController();
@@ -225,7 +228,9 @@ public class UserController {
                     //DER STÅR NOGET ANDET I KODEN
                 } finally {
                     return token;
+
                 }
+
             }
         } else {
             System.out.print("No user found");
