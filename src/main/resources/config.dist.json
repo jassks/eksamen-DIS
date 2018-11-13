@@ -12,5 +12,6 @@
   "PRODUCT_TTL" : 3600,
   "USER_TTL" : 3600,
   "ORDER_TTL" :3600,
-  "KEY" : "ELIZABETH"
+  "KEY" : "ELIZABETH",
+  "SALT" : "SWEETAPPLE"
 }

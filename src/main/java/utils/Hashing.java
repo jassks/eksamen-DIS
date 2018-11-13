@@ -40,7 +40,7 @@ public final class Hashing {
 
   public String hashWithSaltMD5 (String str){
 
-      String salt = "sweetapple";
+      String salt = Config.getSALT();
 
       String saltedString = salt + str ;
 
@@ -71,7 +71,7 @@ public final class Hashing {
 
     public static String hashWithSaltSha (String str){
 
-        String salt = "sweetapple";
+        String salt = Config.getSALT();
 
         String saltedString = salt + str ;
 
