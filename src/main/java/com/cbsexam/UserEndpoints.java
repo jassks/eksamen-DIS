@@ -127,19 +127,17 @@ public class UserEndpoints {
 
   // TODO: Make the system able to update users (FIX)
   @PUT
-  @Path("/{idUser}")
+  @Path("/{idUser}/{token}")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateUser(String body) {
+  public Response updateUser(@PathParam("token") String token, String body) {
 
     User user1 = new Gson().fromJson(body, User.class);
 
-    User user2 = UserController.updateUser(user1);
+    Boolean updated = UserController.updateUser(user1,token);
 
-    String json = new Gson().toJson(user2);
-
-    if (user2 != null){
+    if (updated){
       // Return a response with status 200 and JSON as type
-      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("User has been updated").build();
     }  else {
       return Response.status(400).entity("Could not update user").build();
     }
