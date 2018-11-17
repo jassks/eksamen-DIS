@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import model.Order;
 import utils.Encryption;
+import utils.Log;
 
 @Path("order")
 public class OrderEndpoints {
