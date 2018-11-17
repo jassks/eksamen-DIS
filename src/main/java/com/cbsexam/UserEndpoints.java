@@ -42,6 +42,8 @@ public class UserEndpoints {
   }
 
 
+  public static UserCache  userCache = new UserCache();
+
   /** @return Responses */
   @GET
   @Path("/")
@@ -51,7 +53,6 @@ public class UserEndpoints {
     Log.writeLog(this.getClass().getName(), this, "Get all users", 0);
 
     // Get a list of users
-      UserCache userCache = new UserCache();
     ArrayList<User> users = userCache.getUser(false);
 
     // TODO: Add Encryption to JSON (FIX)
@@ -99,7 +100,7 @@ public class UserEndpoints {
 
       if (token != ""){
           // Return a response with status 200 and JSON as type
-          return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(token).build();
+          return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("Here is your token: " + token).build();
       } else {
           return Response.status(400).entity("Could not verify user").build();
       }
@@ -108,24 +109,21 @@ public class UserEndpoints {
 
   // TODO: Make the system able to delete users (FIX)
   @DELETE
-  @Path("/{idUser}")
+  @Path("/{userId}/{token}")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response deleteUser(String body) {
+  public Response deleteUser(@PathParam("userId") int userId, @PathParam("token") String token) {
 
-      User user1 = new Gson().fromJson(body, User.class);
-
-      User user2 = UserController.deleteUser(user1);
-
-      String json = new Gson().toJson(user2);
+      Boolean deleted = UserController.deleteUser(token);
 
 
-      if(user2 != null){
+      if(deleted) {
           // Return a response with status 200 and JSON as type
-          return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+          return Response.status(200).entity("User deleted").build();
       } else {
           return Response.status(400).entity("Could not delete user").build();
       }
   }
+
 
   // TODO: Make the system able to update users (FIX)
   @PUT

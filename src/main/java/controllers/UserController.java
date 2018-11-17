@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import model.User;
 import utils.Hashing;
 import utils.Log;
@@ -16,8 +18,6 @@ import utils.Log;
 public class UserController {
 
   private static DatabaseController dbCon;
-
-  public static String currentToken;
 
   public UserController() {
     dbCon = new DatabaseController();
@@ -166,29 +166,44 @@ public class UserController {
       sql.printStackTrace();;
     }
 
-
     return user;
   }
 
-  public static User deleteUser (User user) {
+
+  public static Boolean deleteUser (String token) {
 
     if(dbCon == null){
       dbCon = new DatabaseController();
     }
 
     try{
-      PreparedStatement deleteUser = dbCon.getConnection().prepareStatement("DELETE FROM user WHERE id = ? ");
+        DecodedJWT jwt = JWT.decode(token);
+        int id = jwt.getClaim("userId").asInt();
 
-      deleteUser.setInt(1, user.getId());
+        try{
+            PreparedStatement deleteUser = dbCon.getConnection().prepareStatement("DELETE FROM user WHERE id = ? ");
 
-      deleteUser.executeUpdate();
+            deleteUser.setInt(1, id);
 
-    } catch (SQLException sql){
-      sql.printStackTrace();
+            int rowsAffected = deleteUser.executeUpdate();
+
+
+            if (rowsAffected == 1){
+                return true;
+            }
+
+        } catch (SQLException sql){
+            sql.printStackTrace();
+
+        }
+
+    } catch (JWTDecodeException ex) {
+        ex.printStackTrace();
     }
 
-    return user;
+    return false;
   }
+
 
   public static String loginUser (User user) {
 
@@ -221,14 +236,13 @@ public class UserController {
                 try{
                     Algorithm algorithm = Algorithm.HMAC256("secret");
                     token = JWT.create()
-                            .withClaim("userId", user.getId())
+                            .withClaim("userId", newUser.getId())
                             .withIssuer("auth0")
                             .sign(algorithm);
                 }catch(JWTCreationException ex){
                     //DER STÅR NOGET ANDET I KODEN
                 } finally {
                     return token;
-
                 }
 
             }

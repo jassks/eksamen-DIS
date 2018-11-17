@@ -129,27 +129,13 @@ public class OrderController {
     }
 
     // Save addresses to database and save them back to initial order instance
-    Address billing = AddressController.createAddress(order.getBillingAddress());
-    if (billing == null) {
-      return null;
-    } else {
-      order.setBillingAddress(billing);
-    }
+    order.setBillingAddress(AddressController.createAddress(order.getBillingAddress()));
 
-    Address shipping = AddressController.createAddress(order.getShippingAddress());
-    if (shipping == null) {
-      return null;
-    } else {
-      order.setShippingAddress(shipping);
-    }
+    order.setShippingAddress(AddressController.createAddress(order.getShippingAddress()));
+
 
     // Save the user to the database and save them back to initial order instance
-    User customer = UserController.createUser(order.getCustomer());
-    if (customer == null){
-      return null;
-    } else {
-      order.setCustomer(customer);
-    }
+    order.setCustomer(UserController.createUser(order.getCustomer()));
 
 
     // TODO: Enable transactions in order for us to not save the order if somethings fails for some of the other inserts (FIX)
