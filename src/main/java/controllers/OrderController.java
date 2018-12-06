@@ -43,7 +43,7 @@ public class OrderController {
         Address billingAddress = AddressController.getAddress(rs.getInt("billing_address_id"));
         Address shippingAddress = AddressController.getAddress(rs.getInt("shipping_address_id"));
 
-        // Create an object instance of order from the database dataa
+        // Create an object instance of order from the database data
         order =
             new Order(
                 rs.getInt("id"),
@@ -87,7 +87,9 @@ public class OrderController {
     try {
       while(rs.next()) {
 
-        // Perhaps we could optimize things a bit here and get rid of nested queries.
+        // Perhaps we could optimize things a bit here and get rid of nested queries
+        // MÅSKE SKAL MAN LAVE EN INNER JOIN
+        // VI SKAL BRUGE EN INSERT INTO SELECT
         User user = UserController.getUser(rs.getInt("user_id"));
         ArrayList<LineItem> lineItems = LineItemController.getLineItemsForOrder(rs.getInt("id"));
         Address billingAddress = AddressController.getAddress(rs.getInt("billing_address_id"));
@@ -141,7 +143,6 @@ public class OrderController {
 
     // TODO: Enable transactions in order for us to not save the order if somethings fails for some of the other inserts (FIX)
 
-
     Connection connection = dbCon.getConnection();
 
     try{
@@ -186,7 +187,7 @@ public class OrderController {
         connection.rollback();
         System.out.print("Rollback");
       } catch (SQLException ex) {
-        System.out.print("Rollback did not work" + ex.getMessage());
+        System.out.println("Rollback did not work" + ex.getMessage());
       } finally {
         try{
           connection.setAutoCommit(true);

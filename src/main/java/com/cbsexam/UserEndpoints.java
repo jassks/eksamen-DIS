@@ -109,9 +109,9 @@ public class UserEndpoints {
 
   // TODO: Make the system able to delete users (FIX)
   @DELETE
-  @Path("/{userId}/{token}")
+  @Path("/{token}")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response deleteUser(@PathParam("userId") int userId, @PathParam("token") String token) {
+  public Response deleteUser(@PathParam("token") String token) {
 
       Boolean deleted = UserController.deleteUser(token);
 
@@ -131,9 +131,9 @@ public class UserEndpoints {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response updateUser(@PathParam("token") String token, String body) {
 
-    User user1 = new Gson().fromJson(body, User.class);
+    User user = new Gson().fromJson(body, User.class);
 
-    Boolean updated = UserController.updateUser(user1,token);
+    Boolean updated = UserController.updateUser(user,token);
 
     if (updated){
       // Return a response with status 200 and JSON as type
