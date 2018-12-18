@@ -40,10 +40,13 @@ public final class Hashing {
 
   public String hashWithSaltMD5 (String str){
 
+      // Gets the salt value from the config file
       String salt = Config.getSALT();
 
+      // Adds the salt value to the string
       String saltedString = salt + str ;
 
+      // Return the hashed value of the string and salt
       return md5(saltedString);
   }
 
@@ -71,10 +74,13 @@ public final class Hashing {
 
     public static String hashWithSaltSha (String str){
 
+        // Gets the salt value from the config file
         String salt = Config.getSALT();
 
+        // Adds the salt value to the string
         String saltedString = salt + str ;
 
+        // Return the hashed value of the string and salt
         return sha(saltedString);
     }
 }

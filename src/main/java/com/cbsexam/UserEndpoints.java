@@ -29,14 +29,19 @@ public class UserEndpoints {
     // Convert the user object to json in order to return the object
     String json = new Gson().toJson(user);
 
+    // The json object gets encrypted
     json = Encryption.encryptDecryptXOR(json);
 
-    // Return the user with the status code 200
+
     // TODO: What should happen if something breaks down? (FIX)
 
+      // There is already a try-catch in the userController, so it doesn't make sense to use one here.
+      // But instead it could return status 400, so the user knows that something went wrong
     if (user != null) {
+        // Return the user with the status code 200
         return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
     } else {
+        // If the user is not found, a message is returned with the status code 400
         return Response.status(400).entity("Could not find user").build();
     }
   }
@@ -59,6 +64,7 @@ public class UserEndpoints {
     // Transfer users to json in order to return it to the user
     String json = new Gson().toJson(users);
 
+    //The json object gets encrypted
     json = Encryption.encryptDecryptXOR(json);
 
     // Return the users with the status code 200
@@ -94,14 +100,17 @@ public class UserEndpoints {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response loginUser(String body) {
 
+      //Read the json from body and transfer it to a user class
       User user = new Gson().fromJson(body, User.class);
 
+      //Get a token back by using the login method in user controller using the user above
       String token = UserController.loginUser(user);
 
       if (token != ""){
           // Return a response with status 200 and JSON as type
           return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("Here is your token: " + token).build();
       } else {
+          // Status code 400 is returned if the user doesn't exist in the system
           return Response.status(400).entity("Could not verify user").build();
       }
 
@@ -113,13 +122,14 @@ public class UserEndpoints {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response deleteUser(@PathParam("token") String token) {
 
+      // The delete user method from user controller is called with the token, extended from the path, as parameter
       Boolean deleted = UserController.deleteUser(token);
-
 
       if(deleted) {
           // Return a response with status 200 and JSON as type
           return Response.status(200).entity("User deleted").build();
       } else {
+          // If the delete user method return boolean "false", status code 400 is returned
           return Response.status(400).entity("Could not delete user").build();
       }
   }
@@ -131,14 +141,21 @@ public class UserEndpoints {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response updateUser(@PathParam("token") String token, String body) {
 
+    // Read the json from body and transfer it to a user class
     User user = new Gson().fromJson(body, User.class);
 
+    /*
+    The update user method from the user controller is called with following parameters:
+    (1) The json object user
+    (2) The token extended from the path
+     */
     Boolean updated = UserController.updateUser(user,token);
 
     if (updated){
       // Return a response with status 200 and JSON as type
       return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity("User has been updated").build();
     }  else {
+        // If the update user method return boolean "false", status code 400 is returned
       return Response.status(400).entity("Could not update user").build();
     }
   }

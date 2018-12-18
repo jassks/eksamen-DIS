@@ -143,9 +143,12 @@ public class OrderController {
 
     // TODO: Enable transactions in order for us to not save the order if somethings fails for some of the other inserts (FIX)
 
+    //Creates an object of type connection and gives it the value of the database connection
     Connection connection = dbCon.getConnection();
 
     try{
+
+      //Sets autoCommit to be false because we don't want to commit the data to the database
       connection.setAutoCommit(false);
 
       // Insert the product in the DB
@@ -180,6 +183,7 @@ public class OrderController {
 
       order.setLineItems(items);
 
+      //When all the objects have been created the autoCommit is set to be true
       connection.commit();
 
     } catch (SQLException sql) {

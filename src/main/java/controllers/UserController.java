@@ -6,11 +6,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.cbsexam.UserEndpoints;
 import model.User;
 import utils.Hashing;
 import utils.Log;
@@ -46,7 +48,8 @@ public class UserController {
                 rs.getString("first_name"),
                 rs.getString("last_name"),
                 rs.getString("password"),
-                rs.getString("email"));
+                rs.getString("email"),
+                rs.getLong("created_at"));
 
         // return the create object
         return user;
@@ -89,7 +92,8 @@ public class UserController {
                 rs.getString("first_name"),
                 rs.getString("last_name"),
                 rs.getString("password"),
-                rs.getString("email"));
+                    rs.getString("email"),
+                    rs.getLong("created_at"));
 
         // Add element to list
         users.add(user);
@@ -110,7 +114,7 @@ public class UserController {
     Log.writeLog(UserController.class.getName(), user, "Actually creating a user in DB", 0);
 
     // Set creation time for user.
-    user.setCreatedTime(System.currentTimeMillis() / 1000L);
+    long createdTime = System.currentTimeMillis() / 1000L;
 
     // Check for DB Connection
     if (dbCon == null) {
@@ -129,7 +133,7 @@ public class UserController {
             + "', '"
             + user.getEmail()
             + "', "
-            + user.getCreatedTime()
+            + createdTime
             + ")");
 
     if (userID != 0) {
@@ -139,6 +143,8 @@ public class UserController {
       // Return null if user has not been inserted into database
       return null;
     }
+
+    UserEndpoints.userCache.getUser(true);
 
     // Return user
     return user;
@@ -151,22 +157,28 @@ public class UserController {
     }
 
       try{
+          //Decodes the jwt token to get the user id
           DecodedJWT jwt = JWT.decode(token);
           int id = jwt.getClaim("userId").asInt();
 
           try{
+              // Uses a prepared statement to update the user's new information in the database
               PreparedStatement updateUser = dbCon.getConnection().prepareStatement("UPDATE user SET " +
                       "first_name = ?, last_name = ?, password = ?, email = ? WHERE id=? ");
 
               updateUser.setString(1, user.getFirstname());
               updateUser.setString(2, user.getLastname());
-              updateUser.setString(3, user.getPassword());
+              updateUser.setString(3, Hashing.hashWithSaltSha(user.getPassword()));
               updateUser.setString(4, user.getEmail());
               updateUser.setInt(5, id);
 
               int rowsAffected = updateUser.executeUpdate();
 
               if (rowsAffected == 1){
+
+                  //Updates the user cache, so the user is also updated in the cache
+                  UserEndpoints.userCache.getUser(true);
+
                   return true;
               }
 
@@ -179,6 +191,7 @@ public class UserController {
       }
 
     return false;
+
   }
 
 
@@ -189,10 +202,12 @@ public class UserController {
     }
 
     try{
+        // Decodes the jwt token to get the user id
         DecodedJWT jwt = JWT.decode(token);
         int id = jwt.getClaim("userId").asInt();
 
         try{
+            // Uses preparestatement to delete the user in the database
             PreparedStatement deleteUser = dbCon.getConnection().prepareStatement("DELETE FROM user WHERE id = ? ");
 
             deleteUser.setInt(1, id);
@@ -200,6 +215,9 @@ public class UserController {
             int rowsAffected = deleteUser.executeUpdate();
 
             if (rowsAffected == 1){
+
+                // Updates the user cache, so the user is also deleted in the cache
+                UserEndpoints.userCache.getUser(true);
                 return true;
             }
 
@@ -228,6 +246,7 @@ public class UserController {
 
 
     try{
+        // Uses prepared statement to if there is any user in the database with the specific email and password
         PreparedStatement loginUser = dbCon.getConnection().prepareStatement("SELECT * FROM user WHERE email = ? AND password = ?");
 
         loginUser.setString(1,user.getEmail());
@@ -235,6 +254,7 @@ public class UserController {
 
         resultSet = loginUser.executeQuery();
 
+        //If there is found any user --> A new user object is created with the informations from the database
         if (resultSet.next()){
             newUser = new User (
                     resultSet.getInt("id"),
@@ -245,14 +265,17 @@ public class UserController {
 
             if (newUser != null){
                 try{
+                    //Assigns a token to the user
                     Algorithm algorithm = Algorithm.HMAC256("secret");
                     token = JWT.create()
                             .withClaim("userId", newUser.getId())
                             .withIssuer("auth0")
                             .sign(algorithm);
                 }catch(JWTCreationException ex){
-                    //DER STÅR NOGET ANDET I KODEN
+
                 } finally {
+
+                    //Returns token
                     return token;
                 }
 

@@ -43,6 +43,7 @@ public final class Encryption {
        *    -----------------------------------
        *     Orginal         --> 0100 0100 = D
        */
+
       for (int i = 0; i < rawString.length(); i++) {
         thisIsEncrypted.append((char) (rawString.charAt(i) ^ key[i % key.length]));
       }
